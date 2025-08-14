@@ -8,20 +8,23 @@
 class GitHubStorage {
   constructor() {
     this.token = localStorage.getItem('github_token');
-    this.owner = localStorage.getItem('github_owner') || '';
-    this.repo = localStorage.getItem('github_repo') || 'Portal_Cert';
+    this.owner = localStorage.getItem('github_owner') || 'EdinsonB'; // Usuario por defecto
+    this.repo = localStorage.getItem('github_repo') || 'Portal_Cert'; // Repositorio por defecto
     this.apiBase = 'https://api.github.com';
   }
 
   // Configurar credenciales de GitHub
   async configurar() {
-    if (!this.token || !this.owner) {
-      const modal = this.crearModalConfiguracion();
-      return new Promise((resolve) => {
-        modal.onclose = () => resolve(this.token && this.owner);
-      });
+    // Si ya tenemos el token, no mostrar modal
+    if (this.token) {
+      return true;
     }
-    return true;
+    
+    // Solo pedir el token si no lo tenemos
+    const modal = this.crearModalConfiguracion();
+    return new Promise((resolve) => {
+      modal.onclose = () => resolve(this.token);
+    });
   }
 
   crearModalConfiguracion() {
@@ -35,10 +38,7 @@ class GitHubStorage {
     modal.innerHTML = `
       <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%;">
         <h3>🔧 Configuración GitHub</h3>
-        <p>Para guardar avances en la nube, configure su GitHub:</p>
-        
-        <label><strong>Usuario GitHub:</strong></label>
-        <input type="text" id="github-owner" placeholder="tu-usuario" style="width: 100%; margin: 5px 0 15px; padding: 8px;">
+        <p>Para guardar avances en la nube, necesita su token personal de GitHub:</p>
         
         <label><strong>Token Personal:</strong></label>
         <input type="password" id="github-token" placeholder="ghp_..." style="width: 100%; margin: 5px 0 15px; padding: 8px;">
@@ -47,31 +47,30 @@ class GitHubStorage {
           <summary>¿Cómo obtener el token? 👆 Click aquí</summary>
           <ol style="margin: 10px 0; padding-left: 20px; font-size: 0.9em;">
             <li>Ir a GitHub → Settings → Developer settings</li>
-            <li>Personal access tokens → Generate new token</li>
-            <li>Seleccionar scope: <code>repo</code></li>
-            <li>Copiar el token generado</li>
+            <li>Personal access tokens → Tokens (classic)</li>
+            <li>Generate new token → Note: "Portal Cert"</li>
+            <li>Seleccionar scope: <code>repo</code> ✅</li>
+            <li>Generate token y copiar</li>
           </ol>
         </details>
         
         <div style="text-align: center; margin-top: 20px;">
           <button onclick="this.closest('div').parentElement.guardarConfig()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">Guardar</button>
-          <button onclick="this.closest('div').parentElement.cancelarConfig()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Cancelar</button>
+          <button onclick="this.closest('div').parentElement.cancelarConfig()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Usar sin GitHub</button>
         </div>
       </div>
     `;
 
     modal.guardarConfig = () => {
-      const owner = document.getElementById('github-owner').value.trim();
       const token = document.getElementById('github-token').value.trim();
       
-      if (!owner || !token) {
-        alert('Debe completar ambos campos');
+      if (!token) {
+        alert('Debe ingresar el token personal');
         return;
       }
       
-      this.owner = owner;
       this.token = token;
-      localStorage.setItem('github_owner', owner);
+      localStorage.setItem('github_owner', this.owner);
       localStorage.setItem('github_token', token);
       localStorage.setItem('github_repo', this.repo);
       
