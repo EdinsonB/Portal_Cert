@@ -35,6 +35,7 @@ class GitHubStorage {
       align-items: center; justify-content: center;
     `;
     
+    // Crear botones sin onclick inline, los manejamos con JavaScript puro
     modal.innerHTML = `
       <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%;">
         <h3>🔧 Configuración GitHub</h3>
@@ -61,47 +62,78 @@ class GitHubStorage {
       </div>
     `;
 
-    // Definir funciones de manejo de eventos
-    const guardarConfig = () => {
-      const token = document.getElementById('github-token').value.trim();
-      
-      if (!token) {
-        alert('Debe ingresar el token personal');
+    // Agregar modal al DOM primero
+    document.body.appendChild(modal);
+
+    // Referencias guardadas para usar en las funciones
+    const self = this;
+    
+    // Función para guardar configuración  
+    function guardarConfiguracion() {
+      const tokenInput = document.getElementById('github-token');
+      if (!tokenInput) {
+        console.error('❌ No se encontró el input del token');
         return;
       }
       
-      this.token = token;
-      localStorage.setItem('github_owner', this.owner);
+      const token = tokenInput.value.trim();
+      
+      if (!token) {
+        alert('❌ Debe ingresar el token personal');
+        tokenInput.focus();
+        return;
+      }
+      
+      // Guardar configuración
+      self.token = token;
+      localStorage.setItem('github_owner', self.owner);
       localStorage.setItem('github_token', token);
-      localStorage.setItem('github_repo', this.repo);
+      localStorage.setItem('github_repo', self.repo);
       
-      console.log('✅ Configuración guardada:', { owner: this.owner, repo: this.repo, token: token.substring(0, 10) + '...' });
+      console.log('✅ Configuración guardada exitosamente:', { 
+        owner: self.owner, 
+        repo: self.repo, 
+        token: token.substring(0, 10) + '...' 
+      });
       
+      alert('✅ Configuración guardada correctamente');
+      
+      // Cerrar modal
       document.body.removeChild(modal);
       if (modal.onclose) modal.onclose();
-    };
+    }
 
-    const cancelarConfig = () => {
+    // Función para cancelar configuración
+    function cancelarConfiguracion() {
       console.log('❌ Configuración cancelada - usando localStorage');
       document.body.removeChild(modal);
       if (modal.onclose) modal.onclose();
-    };
+    }
 
-    // Agregar event listeners inmediatamente después de agregar al DOM
-    document.body.appendChild(modal);
-    
-    // Obtener botones y agregar eventos
-    const btnGuardar = modal.querySelector('#btn-guardar-config');
-    const btnCancelar = modal.querySelector('#btn-cancelar-config');
-    
-    if (btnGuardar) {
-      btnGuardar.addEventListener('click', guardarConfig);
-      console.log('🔧 Event listener agregado al botón Guardar');
-    }
-    if (btnCancelar) {
-      btnCancelar.addEventListener('click', cancelarConfig);
-      console.log('🔧 Event listener agregado al botón Cancelar');
-    }
+    // Asignar eventos a los botones después de que estén en el DOM
+    setTimeout(() => {
+      const btnGuardar = document.getElementById('btn-guardar-config');
+      const btnCancelar = document.getElementById('btn-cancelar-config');
+      
+      if (btnGuardar) {
+        btnGuardar.onclick = guardarConfiguracion;
+        console.log('🔧 Evento onclick asignado al botón Guardar');
+      } else {
+        console.error('❌ No se encontró el botón Guardar');
+      }
+      
+      if (btnCancelar) {
+        btnCancelar.onclick = cancelarConfiguracion;
+        console.log('🔧 Evento onclick asignado al botón Cancelar');
+      } else {
+        console.error('❌ No se encontró el botón Cancelar');
+      }
+      
+      // Focus en el input del token
+      const tokenInput = document.getElementById('github-token');
+      if (tokenInput) tokenInput.focus();
+      
+    }, 50);
 
     
     return modal;
