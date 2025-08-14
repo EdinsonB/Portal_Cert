@@ -28,6 +28,14 @@ class GitHubStorage {
   }
 
   crearModalConfiguracion() {
+    // Limpiar modales previos que puedan existir
+    const existingModals = document.querySelectorAll('[id^="github-config-modal-"]');
+    existingModals.forEach(modal => {
+      if (document.body.contains(modal)) {
+        document.body.removeChild(modal);
+      }
+    });
+    
     // Crear modal completamente nuevo
     const modalId = 'github-config-modal-' + Date.now();
     const overlay = document.createElement('div');
