@@ -61,7 +61,8 @@ class GitHubStorage {
       </div>
     `;
 
-    modal.guardarConfig = () => {
+    // Definir funciones de manejo de eventos
+    const guardarConfig = () => {
       const token = document.getElementById('github-token').value.trim();
       
       if (!token) {
@@ -74,27 +75,35 @@ class GitHubStorage {
       localStorage.setItem('github_token', token);
       localStorage.setItem('github_repo', this.repo);
       
-      console.log('Configuración guardada:', { owner: this.owner, repo: this.repo, token: token.substring(0, 10) + '...' });
+      console.log('✅ Configuración guardada:', { owner: this.owner, repo: this.repo, token: token.substring(0, 10) + '...' });
       
       document.body.removeChild(modal);
       if (modal.onclose) modal.onclose();
     };
 
-    modal.cancelarConfig = () => {
+    const cancelarConfig = () => {
+      console.log('❌ Configuración cancelada - usando localStorage');
       document.body.removeChild(modal);
       if (modal.onclose) modal.onclose();
     };
 
-    // Agregar event listeners después de crear el modal
-    setTimeout(() => {
-      const btnGuardar = document.getElementById('btn-guardar-config');
-      const btnCancelar = document.getElementById('btn-cancelar-config');
-      
-      if (btnGuardar) btnGuardar.onclick = modal.guardarConfig;
-      if (btnCancelar) btnCancelar.onclick = modal.cancelarConfig;
-    }, 100);
-
+    // Agregar event listeners inmediatamente después de agregar al DOM
     document.body.appendChild(modal);
+    
+    // Obtener botones y agregar eventos
+    const btnGuardar = modal.querySelector('#btn-guardar-config');
+    const btnCancelar = modal.querySelector('#btn-cancelar-config');
+    
+    if (btnGuardar) {
+      btnGuardar.addEventListener('click', guardarConfig);
+      console.log('🔧 Event listener agregado al botón Guardar');
+    }
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', cancelarConfig);
+      console.log('🔧 Event listener agregado al botón Cancelar');
+    }
+
+    
     return modal;
   }
 
