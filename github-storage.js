@@ -55,8 +55,8 @@ class GitHubStorage {
         </details>
         
         <div style="text-align: center; margin-top: 20px;">
-          <button onclick="this.closest('div').parentElement.guardarConfig()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">Guardar</button>
-          <button onclick="this.closest('div').parentElement.cancelarConfig()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Usar sin GitHub</button>
+          <button type="button" id="btn-guardar-config" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">Guardar</button>
+          <button type="button" id="btn-cancelar-config" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Usar sin GitHub</button>
         </div>
       </div>
     `;
@@ -74,14 +74,25 @@ class GitHubStorage {
       localStorage.setItem('github_token', token);
       localStorage.setItem('github_repo', this.repo);
       
+      console.log('Configuración guardada:', { owner: this.owner, repo: this.repo, token: token.substring(0, 10) + '...' });
+      
       document.body.removeChild(modal);
-      modal.onclose && modal.onclose();
+      if (modal.onclose) modal.onclose();
     };
 
     modal.cancelarConfig = () => {
       document.body.removeChild(modal);
-      modal.onclose && modal.onclose();
+      if (modal.onclose) modal.onclose();
     };
+
+    // Agregar event listeners después de crear el modal
+    setTimeout(() => {
+      const btnGuardar = document.getElementById('btn-guardar-config');
+      const btnCancelar = document.getElementById('btn-cancelar-config');
+      
+      if (btnGuardar) btnGuardar.onclick = modal.guardarConfig;
+      if (btnCancelar) btnCancelar.onclick = modal.cancelarConfig;
+    }, 100);
 
     document.body.appendChild(modal);
     return modal;
