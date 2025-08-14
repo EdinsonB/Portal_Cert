@@ -28,115 +28,137 @@ class GitHubStorage {
   }
 
   crearModalConfiguracion() {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
+    // Crear modal completamente nuevo
+    const modalId = 'github-config-modal-' + Date.now();
+    const overlay = document.createElement('div');
+    overlay.id = modalId;
+    overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); z-index: 10000; display: flex;
+      background: rgba(0,0,0,0.8); z-index: 10000; display: flex;
       align-items: center; justify-content: center;
     `;
     
-    // Crear botones sin onclick inline, los manejamos con JavaScript puro
-    modal.innerHTML = `
-      <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%;">
-        <h3>🔧 Configuración GitHub</h3>
-        <p>Para guardar avances en la nube, necesita su token personal de GitHub:</p>
-        
-        <label><strong>Token Personal:</strong></label>
-        <input type="password" id="github-token" placeholder="ghp_..." style="width: 100%; margin: 5px 0 15px; padding: 8px;">
-        
-        <details style="margin: 15px 0;">
-          <summary>¿Cómo obtener el token? 👆 Click aquí</summary>
-          <ol style="margin: 10px 0; padding-left: 20px; font-size: 0.9em;">
-            <li>Ir a GitHub → Settings → Developer settings</li>
-            <li>Personal access tokens → Tokens (classic)</li>
-            <li>Generate new token → Note: "Portal Cert"</li>
-            <li>Seleccionar scope: <code>repo</code> ✅</li>
-            <li>Generate token y copiar</li>
-          </ol>
-        </details>
-        
-        <div style="text-align: center; margin-top: 20px;">
-          <button type="button" id="btn-guardar-config" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">Guardar</button>
-          <button type="button" id="btn-cancelar-config" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Usar sin GitHub</button>
-        </div>
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: white; padding: 30px; border-radius: 10px; 
+      max-width: 500px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    `;
+    
+    content.innerHTML = `
+      <h3 style="margin-top: 0;">🔧 Configuración GitHub</h3>
+      <p>Para guardar avances en la nube, necesita su token personal de GitHub:</p>
+      
+      <label style="display: block; font-weight: bold; margin: 10px 0 5px;">Token Personal:</label>
+      <input type="password" 
+             id="token-input-${modalId}" 
+             placeholder="ghp_..." 
+             style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+      
+      <details style="margin: 15px 0;">
+        <summary style="cursor: pointer;">¿Cómo obtener el token? 👆 Click aquí</summary>
+        <ol style="margin: 10px 0; padding-left: 20px; font-size: 0.9em;">
+          <li>Ir a GitHub → Settings → Developer settings</li>
+          <li>Personal access tokens → Tokens (classic)</li>
+          <li>Generate new token → Note: "Portal Cert"</li>
+          <li>Seleccionar scope: <code>repo</code> ✅</li>
+          <li>Generate token y copiar</li>
+        </ol>
+      </details>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <button id="btn-save-${modalId}" 
+                style="background: #28a745; color: white; border: none; 
+                       padding: 10px 20px; border-radius: 5px; margin-right: 10px; cursor: pointer;">
+          Guardar
+        </button>
+        <button id="btn-cancel-${modalId}" 
+                style="background: #dc3545; color: white; border: none; 
+                       padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+          Usar sin GitHub
+        </button>
       </div>
     `;
-
-    // Agregar modal al DOM primero
-    document.body.appendChild(modal);
-
-    // Referencias guardadas para usar en las funciones
-    const self = this;
     
-    // Función para guardar configuración  
-    function guardarConfiguracion() {
-      const tokenInput = document.getElementById('github-token');
-      if (!tokenInput) {
-        console.error('❌ No se encontró el input del token');
-        return;
-      }
-      
-      const token = tokenInput.value.trim();
-      
-      if (!token) {
-        alert('❌ Debe ingresar el token personal');
-        tokenInput.focus();
-        return;
-      }
-      
-      // Guardar configuración
-      self.token = token;
-      localStorage.setItem('github_owner', self.owner);
-      localStorage.setItem('github_token', token);
-      localStorage.setItem('github_repo', self.repo);
-      
-      console.log('✅ Configuración guardada exitosamente:', { 
-        owner: self.owner, 
-        repo: self.repo, 
-        token: token.substring(0, 10) + '...' 
-      });
-      
-      alert('✅ Configuración guardada correctamente');
-      
-      // Cerrar modal
-      document.body.removeChild(modal);
-      if (modal.onclose) modal.onclose();
-    }
-
-    // Función para cancelar configuración
-    function cancelarConfiguracion() {
-      console.log('❌ Configuración cancelada - usando localStorage');
-      document.body.removeChild(modal);
-      if (modal.onclose) modal.onclose();
-    }
-
-    // Asignar eventos a los botones después de que estén en el DOM
-    setTimeout(() => {
-      const btnGuardar = document.getElementById('btn-guardar-config');
-      const btnCancelar = document.getElementById('btn-cancelar-config');
-      
-      if (btnGuardar) {
-        btnGuardar.onclick = guardarConfiguracion;
-        console.log('🔧 Evento onclick asignado al botón Guardar');
-      } else {
-        console.error('❌ No se encontró el botón Guardar');
-      }
-      
-      if (btnCancelar) {
-        btnCancelar.onclick = cancelarConfiguracion;
-        console.log('🔧 Evento onclick asignado al botón Cancelar');
-      } else {
-        console.error('❌ No se encontró el botón Cancelar');
-      }
-      
-      // Focus en el input del token
-      const tokenInput = document.getElementById('github-token');
-      if (tokenInput) tokenInput.focus();
-      
-    }, 50);
-
+    overlay.appendChild(content);
     
-    return modal;
+    // Función para cerrar modal
+    const closeModal = () => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+      if (overlay.onclose) overlay.onclose();
+    };
+    
+    // Función para guardar (con this context preservado)
+    const saveFunction = (() => {
+      const self = this; // Capturar contexto
+      return () => {
+        const tokenInput = document.getElementById(`token-input-${modalId}`);
+        if (!tokenInput) {
+          console.error('❌ Input de token no encontrado');
+          return;
+        }
+        
+        const token = tokenInput.value.trim();
+        if (!token) {
+          alert('❌ Debe ingresar el token personal');
+          tokenInput.focus();
+          return;
+        }
+        
+        // Validar formato básico del token
+        if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+          if (!confirm('⚠️ El token no parece tener el formato correcto. ¿Continuar?')) {
+            return;
+          }
+        }
+        
+        // Guardar configuración
+        self.token = token;
+        localStorage.setItem('github_owner', self.owner);
+        localStorage.setItem('github_token', token);
+        localStorage.setItem('github_repo', self.repo);
+        
+        console.log('✅ Configuración guardada:', { 
+          owner: self.owner, 
+          repo: self.repo, 
+          token: token.substring(0, 10) + '...' 
+        });
+        
+        alert('✅ Configuración guardada correctamente');
+        closeModal();
+      };
+    })();
+    
+    // Agregar modal al DOM
+    document.body.appendChild(overlay);
+    
+    // Asignar eventos después de agregar al DOM
+    const saveBtn = document.getElementById(`btn-save-${modalId}`);
+    const cancelBtn = document.getElementById(`btn-cancel-${modalId}`);
+    const tokenInput = document.getElementById(`token-input-${modalId}`);
+    
+    if (saveBtn) {
+      saveBtn.onclick = saveFunction;
+      console.log('✅ Evento save asignado');
+    }
+    
+    if (cancelBtn) {
+      cancelBtn.onclick = closeModal;
+      console.log('✅ Evento cancel asignado');
+    }
+    
+    if (tokenInput) {
+      tokenInput.focus();
+      // Permitir guardar con Enter
+      tokenInput.onkeypress = (e) => {
+        if (e.key === 'Enter') {
+          saveFunction();
+        }
+      };
+    }
+    
+    return overlay;
   }
 
   // Verificar si existe archivo de avances para un cliente
