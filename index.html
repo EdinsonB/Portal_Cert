@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checklist de Certificación API</title>
+  
+  <!-- Hojas de estilo -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Layout principal -->
+  <div class="main-layout">
+    
+    <!-- Sidebar de navegación -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-muesca" id="sidebarMuesca" title="Ocultar barra lateral">
+        <span id="sidebarMuescaIcon">&#x25C0;</span>
+      </div>
+      <h3>Puntos de Validación</h3>
+      <div class="sidebar-menu" id="sidebarMenu"></div>
+    </nav>
+    
+    <!-- Botón para mostrar sidebar cuando está oculto -->
+    <div class="sidebar-muesca-flotante" id="sidebarMuescaShow" title="Mostrar barra lateral" style="display:none;">
+      <span style="font-size:1.1em;">&#x25B6;</span>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="container">
+  <h2>Checklist de Certificación para Consumo de API</h2>
+      
+      <!-- Formulario principal -->
+      <form id="checklistForm" autocomplete="off">
+        <div id="checklist"></div>
+        <div class="pagination" id="pagination"></div>
+        <div id="formMsg" style="text-align:center; margin-bottom:10px;"></div>
+        
+        <!-- Botones de acción -->
+        <div style="text-align:center; margin-top:20px;">
+          <button type="button" class="btn" onclick="guardarCambios()">Guardar cambios</button>
+          <button type="button" class="btn" onclick="exportarPDF()">Exportar a PDF</button>
+          <button type="button" class="btn" onclick="descargarAvances()">Descargar avances</button>
+          <input type="file" id="inputCargarAvances" style="display:none;" accept=".txt" />
+          <button type="button" class="btn" onclick="document.getElementById('inputCargarAvances').click()">Cargar avances</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Botón discreto para limpiar evidencias -->
+  <button type="button" class="btn-limpiar-discreto" id="btnLimpiarEvidenciasDiscreto" title="Limpiar evidencias">
+    🗑️
+  </button>
+
+  <!-- Scripts externos -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- Scripts de la aplicación -->
+  <script src="github-storage.js"></script>
+  <script src="script.js"></script>
+  <script src="pdf-export.js"></script>
+</body>
+</html>

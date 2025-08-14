@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checklist de Certificación API</title>
+  <style>
+    body { background: #f4f7fa; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+    .main-layout { display: flex; min-height: 100vh; }
+    .sidebar { background: #3b4a6b; color: #222; min-width: 240px; max-width: 340px; padding: 24px 0 24px 0; border-radius: 0 18px 18px 0; box-shadow: 2px 0 12px #0002; display: flex; flex-direction: column; align-items: stretch; gap: 0; transition: transform 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.2s; position: relative; z-index: 2; }
+    .sidebar-oculta { transform: translateX(-95%); min-width: 0 !important; max-width: 50px !important; padding: 0 !important; overflow: hidden !important; box-shadow: none !important; border-radius: 0 18px 18px 0; }
+    .sidebar-muesca { position: absolute; top: 18px; right: -14px; width: 22px; height: 32px; background: #6e7bb9; border-radius: 0 8px 8px 0; box-shadow: 2px 0 8px #0001; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2000; transition: background 0.2s; border: 1px solid #b6c6e3; border-left: none; color: #fff; font-size: 1.1em; }
+    .sidebar-muesca:hover { background: #4f5d8c; color: #fff; }
+    .sidebar-muesca-flotante { position: fixed !important; left: 0; top: 18px; right: auto; width: 22px; height: 32px; background: #6e7bb9; border-radius: 0 8px 8px 0; box-shadow: 2px 0 8px #0001; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 3000; border: 1px solid #b6c6e3; border-left: none; color: #fff; font-size: 1.1em; transition: background 0.2s; }
+    .sidebar-muesca-flotante:hover { background: #4f5d8c; color: #fff; }
+    .sidebar h3 { font-size: 1.15em; margin-bottom: 18px; font-weight: 700; letter-spacing: 1px; color: #fff; text-align: center; width: 100%; padding-bottom: 10px; border-bottom: 1px solid #6e7bb9; }
+    .sidebar-menu { display: flex; flex-direction: column; gap: 0; width: 100%; margin-top: 10px; }
+    .sidebar .nav-punto { background: #f4f7fa; border: none; color: #3b4a6b; text-align: left; width: 100%; padding: 14px 18px 14px 18px; border-radius: 0; font-size: 1em; cursor: pointer; transition: background 0.15s, color 0.15s; display: flex; align-items: flex-start; gap: 10px; border-left: 4px solid transparent; margin: 0; outline: none; min-height: 48px; line-height: 1.2; font-weight: 500; }
+    .sidebar .nav-punto.active, .sidebar .nav-punto:focus { background: #e3eafc; color: #3b4a6b; font-weight: bold; border-left: 4px solid #6e7bb9; }
+    .sidebar .nav-punto.completo { color: #198754; }
+    .sidebar .nav-punto.incompleto { color: #dc3545; }
+    .sidebar .nav-punto:not(.active):hover { background: #d6e6fa; color: #3b4a6b; }
+    .container { max-width: 780px; margin: 0 auto; padding: 20px 10px 80px 10px; flex: 1; }
+    
+    /* Botón discreto para limpiar evidencias - LATERAL DERECHO */
+    .btn-limpiar-discreto {
+      position: fixed !important;
+      top: 50% !important;
+      right: 20px !important;
+      transform: translateY(-50%) !important;
+      width: 36px;
+      height: 36px;
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+      transition: all 0.2s;
+      z-index: 9999 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-limpiar-discreto:hover {
+      background: #b02a37;
+      transform: translateY(-50%) scale(1.1) !important;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5);
+    }
+    
+    h2 { color: #3b4a6b; text-align: center; margin-bottom: 28px; font-weight: 700; letter-spacing: 1px; }
+    .checklist-item { border-bottom: 1px solid #b6c6e3; padding: 18px 0 10px 0; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 0; transition: background 0.2s; position: relative; }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item label { font-weight: 600; color: #3b4a6b; margin-bottom: 6px; flex: 1 1 100%; font-size: 1.04em; display: flex; align-items: center; gap: 8px; }
+    .checklist-item .punto-faltante { color: #dc3545; font-size: 1.2em; margin-right: 8px; vertical-align: middle; font-weight: bold; display: inline-block; }
+    .campo-espera { background: #f7f9fc; border: 1px solid #b6c6e3; border-radius: 5px; padding: 8px 12px; color: #3b4a6b; margin-bottom: 8px; font-size: 0.98em; width: 100%; box-sizing: border-box; }
+    .checklist-item select { width: 180px; min-width: 140px; background: #fff; border: 1.5px solid #6e7bb9; color: #3b4a6b; font-weight: 500; border-radius: 5px; padding: 6px 8px; margin-bottom: 6px; transition: border-color 0.2s; }
+    .checklist-item select:focus { border-color: #198754; outline: none; background: #e3eafc; color: #198754; }
+    .toolbar-evidencia {
+      margin-bottom: 6px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .toolbar-evidencia button {
+      background: #fff;
+      border: 1px solid #b6c6e3;
+      border-radius: 4px;
+      margin-right: 0;
+      cursor: pointer;
+      font-size: 1em;
+      padding: 2px 7px;
+      color: #3b4a6b;
+      transition: background 0.2s;
+      height: 32px;
+      min-width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .toolbar-evidencia button:hover {
+      background: #e3eafc;
+    }
+    /* Selector de colores básicos simplificado */
+    .color-selector {
+      position: relative;
+      display: inline-block;
+    }
+    .color-selector-btn {
+      background: #fff;
+      border: 1px solid #b6c6e3;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+      padding: 2px 7px;
+      color: #3b4a6b;
+      transition: background 0.2s;
+      height: 32px;
+      min-width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .color-selector-btn:hover {
+      background: #e3eafc;
+    }
+    .color-palette {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      border: 1px solid #b6c6e3;
+      border-radius: 4px;
+      padding: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 1000;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+    }
+    .color-palette.show {
+      display: grid;
+    }
+    .color-option {
+      width: 24px;
+      height: 24px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .color-option:hover {
+      border: 2px solid #333;
+    }
+    .toolbar-evidencia svg {
+      pointer-events: none;
+    }
+    .checklist-item [contenteditable="true"] {
+      width: 100%;
+      min-height: 228px; /* Aumentado 100% más de 114px */
+      max-height: 1440px; /* Aumentado 100% más de 720px */
+      border-radius: 6px;
+      border: 1.5px solid #198754;
+      background: #fff;
+      color: #3b4a6b;
+      font-size: 1em;
+      padding: 40px 60px; /* Aumentado padding */
+      margin-bottom: 4px;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      outline: none;
+      overflow-y: auto;
+      word-break: break-word;
+    }
+    .checklist-item [contenteditable="true"]:focus {
+      border-color: #6e7bb9;
+      background: #f7f9fc;
+      color: #3b4a6b;
+    }
+    .checklist-item [contenteditable="true"] img {
+      display: inline-block;
+      margin: 6px 0;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px #0002;
+      resize: both;
+      cursor: move;
+      transition: box-shadow 0.2s;
+    }
+    .img-resize-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #198754;
+      border-radius: 50%;
+      right: -6px;
+      bottom: -6px;
+      cursor: se-resize;
+      z-index: 10;
+      border: 2px solid #fff;
+      box-shadow: 0 0 2px #0005;
+      display: none;
+    }
+    .img-resizable-wrapper {
+      display: inline-block;
+      position: relative;
+      vertical-align: middle;
+    }
+    .img-resizable-wrapper.selected .img-resize-handle {
+      display: block;
+    }
+    .img-toolbar {
+      display: none;
+      position: absolute;
+      top: -32px;
+      right: 0;
+      z-index: 20;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px #0002;
+      padding: 2px 4px;
+    }
+    .img-toolbar button {
+      background: #fff;
+      border: 1px solid #b6c6e3;
+      border-radius: 4px;
+      margin-left: 2px;
+      cursor: pointer;
+      font-size: 1em;
+      padding: 2px 6px;
+      color: #3b4a6b;
+      transition: background 0.2s;
+    }
+    .img-toolbar button:hover {
+      background: #e3eafc;
+    }
+    .img-resizable-wrapper.selected .img-toolbar {
+      display: inline-block;
+    }
+    .char-count { font-size: 0.85em; color: #6e7bb9; text-align: right; margin-bottom: 2px; display:none; }
+    .btn { background: #6e7bb9; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 600; margin: 0 6px; box-shadow: 0 2px 8px #6e7bb922; transition: background 0.2s, box-shadow 0.2s; }
+    .btn:hover { background: #198754; color: #fff; box-shadow: 0 4px 16px #19875422; }
+    .error { color: #dc3545; font-size: 0.97em; margin-bottom: 8px; font-weight: 500; }
+    .success { color: #198754; font-size: 1em; margin-bottom: 8px; font-weight: 500; }
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 24px 0 0 0; }
+    .pagination button { background: #e3eafc; color: #3b4a6b; border: none; border-radius: 4px; padding: 6px 14px; font-size: 1em; font-weight: 500; cursor: pointer; transition: background 0.2s, color 0.2s; }
+    .pagination button.active, .pagination button:focus { background: #6e7bb9; color: #fff; font-weight: bold; outline: none; }
+    .pagination button:disabled { background: #f1f1f1; color: #aaa; cursor: not-allowed; }
+    @media (max-width: 900px) {
+      .container { max-width: 99vw; padding: 12px 4vw 80px 4vw; }
+      .main-layout { flex-direction: column; }
+      .sidebar { flex-direction: row; min-width: 0; max-width: 100vw; border-radius: 0 0 18px 18px; padding: 12px 4vw; overflow-x: auto; gap: 0; }
+      .sidebar h3 { display: none; }
+      .sidebar-menu { flex-direction: row; width: 100%; gap: 0; }
+      .sidebar .nav-punto { min-width: 120px; justify-content: flex-start; padding: 10px 8px; font-size: 0.97em; border-left: none; border-bottom: 4px solid transparent; border-radius: 0; white-space: normal; align-items: flex-start; }
+      .sidebar .nav-punto.active, .sidebar .nav-punto:focus { border-left: none; border-bottom: 4px solid #6e7bb9; }
+      .sidebar-muesca, .sidebar-muesca-flotante { top: 10px; right: -14px; }
+      .btn-limpiar-discreto { right: 10px !important; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 8px 2vw 80px 2vw; }
+      .checklist-item { flex-direction: column; gap: 0; }
+      .checklist-item select { width: 100%; min-width: 0; }
+      .sidebar .nav-punto { font-size: 0.93em; min-width: 180px; }
+      .btn-limpiar-discreto { right: 5px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-layout">
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-muesca" id="sidebarMuesca" title="Ocultar barra lateral">
+        <span id="sidebarMuescaIcon">&#x25C0;</span>
+      </div>
+      <h3>Puntos de Validación</h3>
+      <div class="sidebar-menu" id="sidebarMenu"></div>
+    </nav>
+    <div class="sidebar-muesca-flotante" id="sidebarMuescaShow" title="Mostrar barra lateral" style="display:none;">
+      <span style="font-size:1.1em;">&#x25B6;</span>
+    </div>
+    <div class="container">
+      <h2>Checklist de Certificación para Consumo de API</h2>
+      <form id="checklistForm" autocomplete="off">
+        <div id="checklist"></div>
+        <div class="pagination" id="pagination"></div>
+        <div id="formMsg" style="text-align:center; margin-bottom:10px;"></div>
+        <div style="text-align:center; margin-top:20px;">
+          <button type="button" class="btn" onclick="guardarCambios()">Guardar cambios</button>
+          <button type="button" class="btn" onclick="exportarPDF()">Exportar a PDF</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Botón discreto para limpiar evidencias - LATERAL DERECHO -->
+  <button type="button" class="btn-limpiar-discreto" id="btnLimpiarEvidenciasDiscreto" title="Limpiar evidencias">
+    🗑️
+  </button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    // Logo ACH en Base64 - solución integrada
+    const logoAchBase64 = "data:image/jpeg;base64,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";
+
+    const checklistItems = [
+      { id: 1, texto: "Autenticación OAuth 2.0/OpenID Connect implementada", esperado: "El sistema debe autenticar usando OAuth 2.0 o OpenID Connect, siguiendo los estándares de seguridad." },
+      { id: 2, texto: "Uso de tokens JWT válidos", esperado: "Las peticiones deben incluir tokens JWT válidos y no expirados." },
+      { id: 3, texto: "Comunicación solo por HTTPS", esperado: "Todas las comunicaciones con la API deben realizarse exclusivamente por HTTPS." },
+      { id: 4, texto: "Gestión de expiración y refresh de tokens", esperado: "El sistema debe manejar la expiración de tokens y usar refresh tokens cuando corresponda." },
+      { id: 5, texto: "Almacenamiento seguro de credenciales", esperado: "Las credenciales y secretos deben almacenarse de forma segura y nunca exponerse públicamente." },
+      { id: 6, texto: "Solicita solo los permisos necesarios", esperado: "El sistema debe solicitar únicamente los permisos (scopes) estrictamente necesarios." },
+      { id: 7, texto: "Respeta restricciones de acceso", esperado: "El sistema debe respetar las restricciones de acceso según los permisos otorgados." },
+      { id: 8, texto: "Manejo de errores y límites de uso", esperado: "El sistema debe manejar correctamente errores y límites de uso (rate limiting)." },
+      { id: 9, texto: "Pruebas de integración y seguridad realizadas", esperado: "Se deben realizar pruebas de integración y seguridad con la API." },
+      { id: 10, texto: "Documentación revisada y comprendida", esperado: "El equipo debe haber revisado y comprendido la documentación de autenticación y autorización." }
+    ];
+    const ITEMS_PER_PAGE = 2;
+    let currentPage = 1;
+    let camposEstado = {};
+
+    // Cerrar paleta de colores al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.color-selector')) {
+        document.querySelectorAll('.color-palette').forEach(palette => {
+          palette.classList.remove('show');
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebar = document.getElementById('sidebar');
+      const muesca = document.getElementById('sidebarMuesca');
+      const muescaIcon = document.getElementById('sidebarMuescaIcon');
+      const muescaShow = document.getElementById('sidebarMuescaShow');
+      let sidebarOculta = false;
+      
+      function actualizarMuesca() {
+        if (sidebarOculta) {
+          muesca.style.display = 'none';
+          muescaShow.style.display = 'flex';
+        } else {
+          muesca.style.display = 'flex';
+          muescaShow.style.display = 'none';
+          muescaIcon.innerHTML = "&#x25C0;";
+        }
+      }
+      
+      muesca.onclick = function() {
+        sidebarOculta = true;
+        sidebar.classList.add('sidebar-oculta');
+        actualizarMuesca();
+      };
+      
+      muescaShow.onclick = function() {
+        sidebarOculta = false;
+        sidebar.classList.remove('sidebar-oculta');
+        actualizarMuesca();
+      };
+      
+      actualizarMuesca();
+
+      // Botón discreto para limpiar evidencias seleccionadas
+      const btnLimpiarDiscreto = document.getElementById('btnLimpiarEvidenciasDiscreto');
+      if (btnLimpiarDiscreto) {
+        btnLimpiarDiscreto.onclick = function() {
+          const evidenciasVisibles = document.querySelectorAll('.evidencias-editable');
+          let algunaSeleccionada = false;
+          let elementosALimpiar = [];
+          
+          evidenciasVisibles.forEach(div => {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+              const range = selection.getRangeAt(0);
+              if (div.contains(range.commonAncestorContainer) || div === range.commonAncestorContainer) {
+                algunaSeleccionada = true;
+                elementosALimpiar.push(div);
+              }
+            }
+          });
+          
+          if (algunaSeleccionada) {
+            if (confirm('¿Seguro que deseas limpiar las evidencias seleccionadas?')) {
+              elementosALimpiar.forEach(div => {
+                // Limpiar evidencias
+                div.innerHTML = '';
+                
+                // Cambiar el select a "Selecciona..."
+                const itemId = div.dataset.id;
+                const selectElement = document.querySelector(`[name="aprobado_${itemId}"]`);
+                if (selectElement) {
+                  selectElement.value = '';
+                }
+                
+                // Guardar cambios
+                guardarEstadoCampo(itemId);
+              });
+              mostrarMensaje('Evidencias seleccionadas limpiadas y estado reiniciado.', 'success');
+            }
+          } else {
+            mostrarMensaje('Selecciona texto o posiciona el cursor en las evidencias que deseas limpiar.', 'error');
+          }
+        };
+      }
+    });
+
+    function renderSidebar() {
+      const sidebarMenu = document.getElementById('sidebarMenu');
+      sidebarMenu.innerHTML = '';
+      for (let idx = 0; idx < checklistItems.length; idx++) {
+        const item = checklistItems[idx];
+        let completo = false;
+        if (camposEstado[`aprobado_${item.id}`] && camposEstado[`evidencias_${item.id}`]) {
+          completo = camposEstado[`aprobado_${item.id}`] !== '' && camposEstado[`evidencias_${item.id}`].trim() !== '';
+        }
+        let clase = 'nav-punto';
+        if (currentPage === Math.floor(idx / ITEMS_PER_PAGE) + 1) clase += ' active';
+        if (completo) clase += ' completo';
+        else clase += ' incompleto';
+        sidebarMenu.innerHTML += `
+          <button type="button" class="${clase}" onclick="goToPage(${Math.floor(idx / ITEMS_PER_PAGE) + 1})" title="Ir al punto ${idx + 1}">
+            <span style="display:inline-block;width:22px;text-align:right;font-weight:bold;">${idx + 1}.</span>
+            <span style="flex:1 1 auto; text-align:left; margin-left:6px;">${item.texto}</span>
+            <span style="font-size:1.1em; margin-left:8px;">${completo ? '✔️' : '⚠️'}</span>
+          </button>
+        `;
+      }
+    }
+    
+    function renderChecklist() {
+      const container = document.getElementById('checklist');
+      container.innerHTML = '';
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, checklistItems.length);
+      checklistItems.slice(startIdx, endIdx).forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'checklist-item';
+        div.setAttribute('id', `item_${item.id}`);
+        div.innerHTML = `
+          <label>
+            <span class="numero-punto">${startIdx + idx + 1}.</span>
+            <span id="alerta_${item.id}" class="punto-faltante" style="display:none;" title="Falta completar este punto">&#9888;</span>
+            ${item.texto}
+          </label>
+          <div class="campo-espera"><strong>¿Qué se espera?</strong><br>${item.esperado}</div>
+          <div style="display:flex;align-items:center;gap:18px;margin-bottom:4px;">
+            <select name="aprobado_${item.id}" required onchange="guardarEstadoCampo(${item.id})" style="margin-right:18px;">
+              <option value="">Selecciona...</option>
+              <option value="Aprobado">Aprobado</option>
+              <option value="No aprobado">No aprobado</option>
+              <option value="No aplica">No aplica</option>
+            </select>
+            <div class="toolbar-evidencia">
+              <button type="button" title="Negrita" onclick="formatoEvidencia(this, 'bold')"><b>B</b></button>
+              <button type="button" title="Cursiva" onclick="formatoEvidencia(this, 'italic')"><i>I</i></button>
+              <button type="button" title="Subrayado" onclick="formatoEvidencia(this, 'underline')"><u>U</u></button>
+              <button type="button" title="Alinear a la izquierda" onclick="formatoEvidencia(this, 'justifyLeft')">&#8676;</button>
+              <button type="button" title="Centrar" onclick="formatoEvidencia(this, 'justifyCenter')">&#8596;</button>
+              <button type="button" title="Alinear a la derecha" onclick="formatoEvidencia(this, 'justifyRight')">&#8677;</button>
+              <button type="button" title="Lista numerada" onclick="formatoEvidencia(this, 'insertOrderedList')">1.</button>
+              <button type="button" title="Lista con viñetas" onclick="formatoEvidencia(this, 'insertUnorderedList')">&#8226;</button>
+              <button type="button" title="Enlace" onclick="formatoEvidencia(this, 'createLink')">🔗</button>
+              <div class="color-selector">
+                <button type="button" class="color-selector-btn" title="Color de texto" onclick="toggleColorPalette(this)">🎨</button>
+                <div class="color-palette">
+                  <div class="color-option" style="background-color: #000000;" onclick="aplicarColor(this, '#000000')"></div>
+                  <div class="color-option" style="background-color: #ff0000;" onclick="aplicarColor(this, '#ff0000')"></div>
+                  <div class="color-option" style="background-color: #00ff00;" onclick="aplicarColor(this, '#00ff00')"></div>
+                  <div class="color-option" style="background-color: #0000ff;" onclick="aplicarColor(this, '#0000ff')"></div>
+                  <div class="color-option" style="background-color: #ffff00;" onclick="aplicarColor(this, '#ffff00')"></div>
+                  <div class="color-option" style="background-color: #ff00ff;" onclick="aplicarColor(this, '#ff00ff')"></div>
+                  <div class="color-option" style="background-color: #00ffff;" onclick="aplicarColor(this, '#00ffff')"></div>
+                  <div class="color-option" style="background-color: #ffffff; border-color: #000;" onclick="aplicarColor(this, '#ffffff')"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div contenteditable="true" class="evidencias-editable" name="observaciones_${item.id}" data-id="${item.id}" spellcheck="true" aria-label="Evidencias (puede pegar imágenes y texto)"></div>
+          <div class="char-count" id="contador_${item.id}"></div>
+        `;
+        container.appendChild(div);
+      });
+      cargarCambios();
+      renderSidebar();
+      renderPagination();
+      inicializarEvidenciasEditables();
+    }
+
+    // Función para mostrar/ocultar paleta de colores
+    function toggleColorPalette(btn) {
+      const palette = btn.nextElementSibling;
+      const isVisible = palette.classList.contains('show');
+      
+      // Cerrar todas las paletas
+      document.querySelectorAll('.color-palette').forEach(p => p.classList.remove('show'));
+      
+      // Mostrar la paleta actual si no estaba visible
+      if (!isVisible) {
+        palette.classList.add('show');
+      }
+    }
+
+    // Función para aplicar color seleccionado
+    function aplicarColor(colorDiv, color) {
+      const evidenciaDiv = colorDiv.closest('.checklist-item').querySelector('.evidencias-editable');
+      evidenciaDiv.focus();
+      document.execCommand('foreColor', false, color);
+      
+      // Cerrar la paleta
+      colorDiv.closest('.color-palette').classList.remove('show');
+    }
+
+    // Barra de formato tipo Word mejorada
+    function formatoEvidencia(btn, comando) {
+      const div = btn.closest('.checklist-item').querySelector('.evidencias-editable');
+      div.focus();
+      if (comando === 'createLink') {
+        let url = prompt('URL del enlace:');
+        if (url) document.execCommand('createLink', false, url);
+      } else {
+        document.execCommand(comando, false, null);
+      }
+    }
+
+    // Edición de imágenes: rotar, voltear, eliminar
+    function editarImagen(btn, accion) {
+      const wrapper = btn.closest('.img-resizable-wrapper');
+      const img = wrapper.querySelector('img');
+      if (accion === 'rotar') {
+        let rot = parseInt(img.getAttribute('data-rot') || '0', 10);
+        rot = (rot + 90) % 360;
+        img.style.transform = `rotate(${rot}deg) scaleX(${img.getAttribute('data-flipH') === '1' ? -1 : 1})`;
+        img.setAttribute('data-rot', rot);
+      } else if (accion === 'flipH') {
+        let flip = img.getAttribute('data-flipH') === '1' ? '0' : '1';
+        img.style.transform = `rotate(${img.getAttribute('data-rot') || 0}deg) scaleX(${flip === '1' ? -1 : 1})`;
+        img.setAttribute('data-flipH', flip);
+      } else if (accion === 'eliminar') {
+        wrapper.remove();
+      }
+    }
+
+    // Permite redimensionar, mover y editar imágenes dentro del campo de evidencias
+    function inicializarEvidenciasEditables() {
+      document.querySelectorAll('.evidencias-editable').forEach(div => {
+        div.oninput = function() {
+          guardarEstadoCampo(div.dataset.id);
+        };
+        div.onpaste = function(e) {
+          const items = (e.clipboardData || window.clipboardData).items;
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+              const file = items[i].getAsFile();
+              const reader = new FileReader();
+              reader.onload = function(event) {
+                const sel = window.getSelection();
+                const range = sel.getRangeAt(0);
+                const wrapper = document.createElement('span');
+                wrapper.className = 'img-resizable-wrapper';
+                wrapper.contentEditable = "false";
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                // Asignar tamaño al 70% del natural
+                img.onload = function() {
+                  img.style.width = (this.naturalWidth * 0.7) + 'px';
+                  img.style.height = (this.naturalHeight * 0.7) + 'px';
+                };
+                img.setAttribute('draggable', 'true');
+                wrapper.appendChild(img);
+
+                // Barra de edición de imagen
+                const toolbar = document.createElement('span');
+                toolbar.className = 'img-toolbar';
+                toolbar.innerHTML = `
+                  <button type="button" title="Eliminar imagen" onclick="editarImagen(this, 'eliminar')">🗑️</button>
+                `;
+                wrapper.appendChild(toolbar);
+
+                const handle = document.createElement('span');
+                handle.className = 'img-resize-handle';
+                wrapper.appendChild(handle);
+                range.insertNode(wrapper);
+
+                // Selección para resize y edición
+                img.onclick = function(e) {
+                  e.stopPropagation();
+                  document.querySelectorAll('.img-resizable-wrapper').forEach(w => w.classList.remove('selected'));
+                  wrapper.classList.add('selected');
+                };
+
+                // Resize mejorado (sin límites)
+                handle.onmousedown = function(e) {
+                  e.preventDefault();
+                  const startX = e.clientX;
+                  const startY = e.clientY;
+                  const startWidth = parseInt(document.defaultView.getComputedStyle(img).width, 10);
+                  const startHeight = parseInt(document.defaultView.getComputedStyle(img).height, 10);
+                  function mousemove(ev) {
+                    const newWidth = startWidth + ev.clientX - startX;
+                    const newHeight = startHeight + ev.clientY - startY;
+                    img.style.width = newWidth + 'px';
+                    img.style.height = newHeight + 'px';
+                  }
+                  function mouseup() {
+                    document.removeEventListener('mousemove', mousemove);
+                    document.removeEventListener('mouseup', mouseup);
+                  }
+                  document.addEventListener('mousemove', mousemove);
+                  document.addEventListener('mouseup', mouseup);
+                };
+
+                // Drag & drop dentro del campo
+                img.ondragstart = function(ev) {
+                  ev.dataTransfer.setData('text/plain', '');
+                  window._draggedImg = wrapper;
+                };
+                div.ondragover = function(ev) {
+                  ev.preventDefault();
+                };
+                div.ondrop = function(ev) {
+                  ev.preventDefault();
+                  const dropRange = document.caretRangeFromPoint(ev.clientX, ev.clientY);
+                  if (window._draggedImg && dropRange) {
+                    dropRange.insertNode(window._draggedImg);
+                    window._draggedImg = null;
+                  }
+                };
+                guardarEstadoCampo(div.dataset.id);
+              };
+              reader.readAsDataURL(file);
+              e.preventDefault();
+            }
+          }
+        };
+        // Permitir seleccionar imagen para resize y edición
+        div.addEventListener('click', function(e) {
+          if (!e.target.closest('.img-resizable-wrapper')) {
+            document.querySelectorAll('.img-resizable-wrapper').forEach(w => w.classList.remove('selected'));
+          }
+        });
+      });
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(checklistItems.length / ITEMS_PER_PAGE);
+      const pagDiv = document.getElementById('pagination');
+      pagDiv.innerHTML = '';
+      pagDiv.innerHTML += `<button onclick="prevPage()" ${currentPage === 1 ? 'disabled' : ''}>&lt; Anterior</button>`;
+      for (let i = 1; i <= totalPages; i++) {
+        pagDiv.innerHTML += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+      }
+      pagDiv.innerHTML += `<button onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>Siguiente &gt;</button>`;
+    }
+    
+    function guardarEstadoCampo(id) {
+      const aprobado = document.querySelector(`[name="aprobado_${id}"]`);
+      const evidenciasDiv = document.querySelector(`.evidencias-editable[name="observaciones_${id}"]`);
+      camposEstado[`aprobado_${id}`] = aprobado ? aprobado.value : '';
+      camposEstado[`evidencias_${id}`] = evidenciasDiv ? evidenciasDiv.innerHTML : '';
+      localStorage.setItem('certificacionChecklistCampos', JSON.stringify(camposEstado));
+      renderSidebar();
+    }
+    
+    function goToPage(page) {
+      guardarCamposPaginaActual();
+      currentPage = page;
+      renderChecklist();
+    }
+    
+    function prevPage() {
+      guardarCamposPaginaActual();
+      if (currentPage > 1) {
+        currentPage--;
+        renderChecklist();
+      }
+    }
+    
+    function nextPage() {
+      guardarCamposPaginaActual();
+      const totalPages = Math.ceil(checklistItems.length / ITEMS_PER_PAGE);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderChecklist();
+      }
+    }
+    
+    function guardarCamposPaginaActual() {
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, checklistItems.length);
+      checklistItems.slice(startIdx, endIdx).forEach(item => {
+        guardarEstadoCampo(item.id);
+      });
+    }
+    
+    function actualizarContadorEditable(div, id) {
+      // Ya no hay límite ni contador visible
+    }
+    
+    function validarCampos() {
+      let valido = true;
+      let msg = '';
+      let faltantes = [];
+      checklistItems.forEach(item => {
+        const aprobado = camposEstado[`aprobado_${item.id}`];
+        const evidencias = camposEstado[`evidencias_${item.id}`];
+        const alerta = document.getElementById(`alerta_${item.id}`);
+        let incompleto = false;
+        if (!aprobado) { valido = false; incompleto = true; }
+        // Considera vacío si no hay texto ni imágenes
+        const temp = document.createElement('div');
+        temp.innerHTML = evidencias || '';
+        const hasContent = temp.innerText.trim().length > 0 || temp.querySelector('img');
+        if (!hasContent) { valido = false; incompleto = true; }
+        if (alerta) {
+          if (incompleto) { alerta.style.display = 'inline-block'; }
+          else { alerta.style.display = 'none'; }
+        }
+        if (incompleto) { faltantes.push(item.id); }
+      });
+      if (!valido) {
+        msg = 'Faltan puntos por completar: ' + faltantes.map(id => id).join(', ');
+      }
+      mostrarMensaje(msg, valido ? 'success' : 'error');
+      return valido;
+    }
+    
+    function mostrarMensaje(msg, tipo) {
+      const formMsg = document.getElementById('formMsg');
+      if (msg) {
+        formMsg.innerHTML = `<span class="${tipo}">${msg}</span>`;
+      } else {
+        formMsg.innerHTML = '';
+      }
+    }
+    
+    function guardarCambios() {
+      guardarCamposPaginaActual();
+      localStorage.setItem('certificacionChecklistCampos', JSON.stringify(camposEstado));
+      mostrarMensaje('Cambios guardados correctamente.', 'success');
+      renderSidebar();
+    }
+    
+    function cargarCambios() {
+      camposEstado = JSON.parse(localStorage.getItem('certificacionChecklistCampos') || '{}');
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, checklistItems.length);
+      checklistItems.slice(startIdx, endIdx).forEach(item => {
+        if (camposEstado[`aprobado_${item.id}`]) {
+          document.querySelector(`[name="aprobado_${item.id}"]`).value = camposEstado[`aprobado_${item.id}`];
+        }
+        if (camposEstado[`evidencias_${item.id}`]) {
+          const obsDiv = document.querySelector(`.evidencias-editable[name="observaciones_${item.id}"]`);
+          if (obsDiv) {
+            obsDiv.innerHTML = camposEstado[`evidencias_${item.id}`];
+            actualizarContadorEditable(obsDiv, item.id);
+          }
+        }
+      });
+    }
+
+// Utilidad: esperar a que carguen imágenes dentro de un nodo (para html2canvas)
+function waitForImages(root) {
+  const imgs = Array.from((root || document).querySelectorAll('img'));
+  if (!imgs.length) return Promise.resolve();
+  return Promise.all(
+    imgs.map(img => {
+      if (img.complete && img.naturalWidth) return Promise.resolve();
+      return new Promise(res => {
+        img.onload = () => res();
+        img.onerror = () => res();
+      });
+    })
+  );
+}
+
+// Funciones simplificadas para manejo de logo Base64
+function cargarImagenBase64(src) {
+  return Promise.resolve(logoAchBase64);
+}
+
+function tryFileReader(src, resolve, reject) {
+  resolve(logoAchBase64);
+}
+
+async function loadFirstAvailableImage(paths) {
+  console.log('✅ Logo integrado en Base64 - carga instantánea');
+  return logoAchBase64;
+}
+
+// Exportar PDF con cabecera de 3 columnas (logo + título del <h2> + empresa)
+async function exportarPDF() {
+  try {
+    // 1) Datos base
+    const tituloDoc = (document.querySelector('.container h2')?.textContent || document.querySelector('h2')?.textContent || document.title || 'Documento');
+    
+    // Solicitar el nombre de la empresa antes de continuar - SIEMPRE PREGUNTAR
+    let empresa = prompt('Ingrese el nombre de la empresa a certificar:');
+    if (!empresa || empresa.trim() === '') {
+      mostrarMensaje('Operación cancelada. Se requiere el nombre de la empresa para generar el PDF.', 'error');
+      return;
+    }
+    empresa = empresa.trim();
+    localStorage.setItem('empresaCert', empresa);
+    
+    const fechaActual = new Date().toLocaleDateString('es-CO');
+
+    // 2) Utilidades
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
+    }
+    function bust(src) { 
+      return src; 
+    }
+
+    // 3) Logo ACH en Base64 (imagen real)
+    const logoAchBase64 = "data:image/jpeg;base64,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";
+
+    // 4) Plantilla HTML con cabecera profesional y logo Base64
+    const plantillaHTML = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #fff; color: #333; line-height: 1.4; }
+
+    .pdf-header {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center;
+      gap: 0; height: 100px; background: #f8f9fa; border: 1px solid #000; padding: 20px;
+      width: 100%; box-sizing: border-box;
+    }
+    
+    .col-logo { 
+      display: flex; align-items: center; justify-content: center; height: 100%; 
+      border-right: 1px solid #000; padding-right: 15px;
+    }
+    
+    .logo-img {
+      max-width: 100px; max-height: 60px; width: auto; height: auto;
+      object-fit: contain; border-radius: 4px;
+    }
+
+    .col-title { 
+      display: flex; align-items: center; justify-content: center; height: 100%; 
+      border-right: 1px solid #000; padding: 0 15px;
+    }
+    .title-text { color: #000; font-weight: 700; font-size: 18px; text-align: center; line-height: 1.4; }
+
+    .col-empresa { 
+      height: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; 
+      padding-left: 15px;
+    }
+    .empresa-label { font-size: 16px; color: #000; margin-bottom: 6px; font-weight: 600; }
+
+    .content-area { 
+      width: 100%; box-sizing: border-box; border-left: 1px solid #000; 
+      border-right: 1px solid #000; border-bottom: 1px solid #000; border-top: none; 
+      padding: 0; background: #fff; display: block;
+    }
+    .checklist-item { margin: 0; page-break-inside: avoid; break-inside: avoid; display: block; }
+    .item-number { font-weight: bold; color: #333; font-size: 1.1em; margin-right: 8px; }
+    .item-title { font-weight: 600; color: #333; margin: 15px 20px 10px; font-size: 16px; line-height: 1.3; display: block; }
+    .item-expected { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 12px; margin: 0 20px 12px; font-size: 13px; color: #495057; }
+    .item-expected strong { color: #333; font-size: 14px; display: block; margin-bottom: 8px; }
+    .item-status { margin: 0 20px 12px; font-size: 14px; display: block; }
+    .item-status strong { color: #333; margin-right: 8px; }
+    .item-evidence { background: #fafbfc; border: 1px solid #e9ecef; border-radius: 6px; padding: 15px; min-height: 60px; font-size: 13px; color: #495057; margin: 0 20px 20px; }
+    .item-evidence img { max-width: 100%; height: auto; border-radius: 4px; margin: 8px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+
+    .status-aprobado { color: #28a745; font-weight: bold; background: #d4edda; padding: 4px 12px; border-radius: 6px; display: inline-block; }
+    .status-no-aprobado { color: #dc3545; font-weight: bold; background: #f8d7da; padding: 4px 12px; border-radius: 6px; display: inline-block; }
+    .status-no-aplica { color: #6c757d; font-weight: bold; background: #e9ecef; padding: 4px 12px; border-radius: 6px; display: inline-block; }
+    .status-pendiente { color: #856404; font-weight: bold; background: #fff3cd; padding: 4px 12px; border-radius: 6px; display: inline-block; }
+    
+    /* Estilo para logo Base64 */
+    .logo-img {
+      max-width: 100px; max-height: 60px; width: auto; height: auto;
+      object-fit: contain; border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-header">
+    <div class="col-logo">
+      <img src="${logoAchBase64}" alt="ACH Colombia" class="logo-img" />
+    </div>
+    <div class="col-title">
+      <div class="title-text">${escapeHtml(tituloDoc)}</div>
+    </div>
+    <div class="col-empresa">
+      <div class="empresa-label">Empresa: ${escapeHtml(empresa)}</div>
+      <div class="empresa-label">Fecha: ${fechaActual}</div>
+    </div>
+  </div>
+  <div class="content-area">
+    {{#CADA_ITEM}}
+      <div class="checklist-item">
+        <div class="item-title"><span class="item-number">{{NUMERO}}.</span>{{TITULO}}</div>
+        <div class="item-expected"><strong>¿Qué se espera?</strong><br>{{ESPERADO}}</div>
+        <div class="item-status"><strong>Estado:</strong> <span class="status-{{ESTADO_CLASE}}">{{ESTADO}}</span></div>
+        <div class="item-evidence"><strong>Evidencias:</strong><br>{{EVIDENCIAS}}</div>
+      </div>
+    {{/CADA_ITEM}}
+  </div>
+</body>
+</html>`;
+
+    // 5) Items
+    let itemsHTML = '';
+    checklistItems.forEach((item, idx) => {
+      const aprobado = (camposEstado[`aprobado_${item.id}`] || '').trim();
+      const evidencias = (camposEstado[`evidencias_${item.id}`] || '').trim();
+      let estadoClase = 'pendiente';
+      switch (aprobado.toLowerCase()) {
+        case 'aprobado': estadoClase = 'aprobado'; break;
+        case 'no aprobado': estadoClase = 'no-aprobado'; break;
+        case 'no aplica': estadoClase = 'no-aplica'; break;
+      }
+      itemsHTML += `
+        <div class="checklist-item">
+          <div class="item-title"><span class="item-number">${idx + 1}.</span> ${item.texto}</div>
+          <div class="item-expected"><strong>¿Qué se espera?</strong><br>${item.esperado}</div>
+          <div class="item-status"><strong>Estado:</strong> <span class="status-${estadoClase}">${aprobado || 'Sin seleccionar'}</span></div>
+          <div class="item-evidence"><strong>Evidencias:</strong><br>${evidencias || ''}</div>
+        </div>`;
+    });
+
+    // 6) Remplazar bloque de items
+    const htmlFinal = plantillaHTML.replace(/{{#CADA_ITEM}}[\s\S]*?{{\/CADA_ITEM}}/g, itemsHTML)
+      .replace(/{{NUMERO}}/g, '') // ya lo inyectamos arriba por item
+      .replace(/{{TITULO}}/g, '')
+      .replace(/{{ESPERADO}}/g, '')
+      .replace(/{{ESTADO_CLASE}}/g, '')
+      .replace(/{{ESTADO}}/g, '')
+      .replace(/{{EVIDENCIAS}}/g, '');
+
+    // 7) Render y exportar
+    const tempDiv = document.createElement('div');
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-99999px';
+    tempDiv.style.top = '0';
+    tempDiv.style.width = '900px';
+    tempDiv.style.background = '#fff';
+    tempDiv.style.zIndex = '-1';
+    tempDiv.innerHTML = htmlFinal;
+    document.body.appendChild(tempDiv);
+
+    await waitForImages(tempDiv);
+
+    const canvas = await html2canvas(tempDiv, {
+      scale: 1,
+      backgroundColor: '#fff',
+      useCORS: true,
+      windowWidth: tempDiv.scrollWidth,
+      windowHeight: tempDiv.scrollHeight,
+      scrollY: -window.scrollY,
+      allowTaint: true,
+      imageTimeout: 15000,
+    });
+
+    const pdf = new window.jspdf.jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 40; const imgWidth = pageWidth - margin * 2;
+    let y = 0; let page = 0; const maxPageHeight = pageHeight - margin * 2;
+
+    while (y < canvas.height) {
+      if (page > 0) pdf.addPage();
+      const availableHeight = Math.min(maxPageHeight, canvas.height - y);
+      const sliceHeight = Math.min(availableHeight * canvas.width / imgWidth, canvas.height - y);
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width; pageCanvas.height = sliceHeight;
+      const ctx2 = pageCanvas.getContext('2d');
+      ctx2.fillStyle = '#fff'; ctx2.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+      ctx2.drawImage(canvas, 0, y, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+      const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+      const drawHeight = (sliceHeight * imgWidth) / canvas.width;
+      pdf.addImage(pageImgData, 'JPEG', margin, margin, imgWidth, drawHeight);
+      y += sliceHeight; page++;
+    }
+
+    pdf.save('checklist_certificacion_ach.pdf');
+    document.body.removeChild(tempDiv);
+    mostrarMensaje('PDF generado exitosamente', 'success');
+  } catch (error) {
+    console.error('Error al generar PDF:', error);
+    mostrarMensaje('Error al generar el PDF: ' + error.message, 'error');
+  }
+}
+
+    window.onload = function() {
+      camposEstado = JSON.parse(localStorage.getItem('certificacionChecklistCampos') || '{}');
+      renderChecklist();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,734 @@
+/* =============================================================================
+   CERTIFICACIÓN API - ESTILOS PRINCIPALES
+   ============================================================================= */
+
+/* Variables CSS para mantenimiento fácil */
+:root {
+  --color-primario: #3b4a6b;
+  --color-secundario: #6e7bb9;
+  --color-exito: #198754;
+  --color-error: #dc3545;
+  --color-advertencia: #856404;
+  --color-info: #0dcaf0;
+  --color-warning: #ffc107;
+  --color-fondo: #f4f7fa;
+  --color-fondo-claro: #f8f9fc;
+  --color-border: #b6c6e3;
+  --color-texto: #3b4a6b;
+  --color-texto-claro: #495057;
+  --border-radius: 6px;
+  --sombra-sutil: 0 2px 8px rgba(0,0,0,0.08);
+  --sombra-media: 0 2px 12px rgba(0,0,0,0.15);
+  --transicion: 0.2s ease;
+}
+
+/* =============================================================================
+   RESET Y ESTILOS BASE
+   ============================================================================= */
+body {
+  background: var(--color-fondo);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--color-texto);
+  line-height: 1.5;
+}
+
+/* =============================================================================
+   LAYOUT PRINCIPAL
+   ============================================================================= */
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 10px 80px 10px;
+  flex: 1;
+}
+
+/* =============================================================================
+   SIDEBAR Y NAVEGACIÓN
+   ============================================================================= */
+.sidebar {
+  background: var(--color-primario);
+  color: #fff;
+  min-width: 240px;
+  max-width: 340px;
+  padding: 24px 0;
+  border-radius: 0 18px 18px 0;
+  box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow var(--transicion);
+  position: relative;
+  z-index: 2;
+}
+
+.sidebar-oculta {
+  transform: translateX(-95%);
+  min-width: 0 !important;
+  max-width: 50px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+  border-radius: 0 18px 18px 0;
+}
+
+.sidebar h3 {
+  font-size: 1.15em;
+  margin-bottom: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  text-align: center;
+  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-secundario);
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.sidebar .nav-punto {
+  background: var(--color-fondo);
+  border: none;
+  color: var(--color-primario);
+  text-align: left;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 0;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-left: 4px solid transparent;
+  margin: 0;
+  outline: none;
+  min-height: 48px;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.sidebar .nav-punto.active,
+.sidebar .nav-punto:focus {
+  background: #e3eafc;
+  color: var(--color-primario);
+  font-weight: bold;
+  border-left: 4px solid var(--color-secundario);
+}
+
+.sidebar .nav-punto.completo {
+  color: var(--color-exito);
+}
+
+.sidebar .nav-punto.incompleto {
+  color: var(--color-error);
+}
+
+.sidebar .nav-punto:not(.active):hover {
+  background: #d6e6fa;
+  color: var(--color-primario);
+}
+
+/* =============================================================================
+   CONTROLES DE SIDEBAR
+   ============================================================================= */
+.sidebar-muesca,
+.sidebar-muesca-flotante {
+  position: absolute;
+  top: 18px;
+  right: -14px;
+  width: 22px;
+  height: 32px;
+  background: var(--color-secundario);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2000;
+  transition: background var(--transicion);
+  border: 1px solid var(--color-border);
+  border-left: none;
+  color: #fff;
+  font-size: 1.1em;
+}
+
+.sidebar-muesca:hover,
+.sidebar-muesca-flotante:hover {
+  background: #4f5d8c;
+  color: #fff;
+}
+
+.sidebar-muesca-flotante {
+  position: fixed !important;
+  left: 0;
+  top: 18px;
+  right: auto;
+  z-index: 3000;
+}
+
+/* =============================================================================
+   TÍTULOS Y ENCABEZADOS
+   ============================================================================= */
+h2 {
+  color: var(--color-primario);
+  text-align: center;
+  margin-bottom: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* =============================================================================
+   ITEMS DEL CHECKLIST
+   ============================================================================= */
+.checklist-item {
+  border-bottom: 1px solid var(--color-border);
+  padding: 18px 0 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px 0;
+  transition: background var(--transicion);
+  position: relative;
+}
+
+.checklist-item:last-child {
+  border-bottom: none;
+}
+
+.checklist-item label {
+  font-weight: 600;
+  color: var(--color-primario);
+  margin-bottom: 6px;
+  flex: 1 1 100%;
+  font-size: 1.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.punto-faltante {
+  color: var(--color-error);
+  font-size: 1.2em;
+  margin-right: 8px;
+  vertical-align: middle;
+  font-weight: bold;
+  display: inline-block;
+}
+
+/* =============================================================================
+   CAMPOS DE FORMULARIO
+   ============================================================================= */
+.campo-espera {
+  background: var(--color-fondo-claro);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  padding: 8px 12px;
+  color: var(--color-primario);
+  margin-bottom: 8px;
+  font-size: 0.98em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.checklist-item select {
+  width: 180px;
+  min-width: 140px;
+  background: #fff;
+  border: 1.5px solid var(--color-secundario);
+  color: var(--color-primario);
+  font-weight: 500;
+  border-radius: 5px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  transition: border-color var(--transicion);
+}
+
+.checklist-item select:focus {
+  border-color: var(--color-exito);
+  outline: none;
+  background: #e3eafc;
+  color: var(--color-exito);
+}
+
+/* =============================================================================
+   TOOLBAR DE EVIDENCIAS
+   ============================================================================= */
+.toolbar-evidencia {
+  margin-bottom: 6px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-evidencia button {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  margin-right: 0;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 2px 7px;
+  color: var(--color-primario);
+  transition: background var(--transicion);
+  height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-evidencia button:hover {
+  background: #e3eafc;
+}
+
+.toolbar-evidencia svg {
+  pointer-events: none;
+}
+
+/* =============================================================================
+   SELECTOR DE COLORES
+   ============================================================================= */
+.color-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.color-selector-btn {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 2px 7px;
+  color: var(--color-primario);
+  transition: background var(--transicion);
+  height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color-selector-btn:hover {
+  background: #e3eafc;
+}
+
+.color-palette {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 4px;
+  box-shadow: var(--sombra-media);
+  z-index: 1000;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+
+.color-palette.show {
+  display: grid;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.color-option:hover {
+  border: 2px solid #333;
+}
+
+/* =============================================================================
+   CAMPOS DE EVIDENCIAS (CONTENTEDITABLE)
+   ============================================================================= */
+.checklist-item [contenteditable="true"] {
+  width: 100%;
+  min-height: 228px;
+  max-height: 1440px;
+  border-radius: var(--border-radius);
+  border: 1.5px solid var(--color-exito);
+  background: #fff;
+  color: var(--color-primario);
+  font-size: 1em;
+  padding: 40px 60px;
+  margin-bottom: 4px;
+  transition: border-color var(--transicion), background var(--transicion), color var(--transicion);
+  outline: none;
+  overflow-y: auto;
+  overflow-x: auto;
+  word-break: break-word;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.checklist-item [contenteditable="true"]:focus {
+  border-color: var(--color-secundario);
+  background: var(--color-fondo-claro);
+  color: var(--color-primario);
+}
+
+/* =============================================================================
+   ESTILOS PARA CÓDIGO Y TEXTO LARGO EN EVIDENCIAS
+   ============================================================================= */
+.checklist-item [contenteditable="true"] code,
+.checklist-item [contenteditable="true"] pre {
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: block;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.checklist-item [contenteditable="true"] code {
+  display: inline;
+  padding: 2px 6px;
+  margin: 0 2px;
+}
+
+.checklist-item [contenteditable="true"] a {
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+/* =============================================================================
+   MANEJO DE IMÁGENES
+   ============================================================================= */
+.checklist-item [contenteditable="true"] img {
+  display: inline-block;
+  margin: 6px 0;
+  border-radius: 4px;
+  box-shadow: var(--sombra-sutil);
+  resize: both;
+  cursor: move;
+  transition: box-shadow var(--transicion);
+}
+
+.img-resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-exito);
+  border-radius: 50%;
+  right: -6px;
+  bottom: -6px;
+  cursor: se-resize;
+  z-index: 10;
+  border: 2px solid #fff;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+  display: none;
+}
+
+.img-resizable-wrapper {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+}
+
+.img-resizable-wrapper.selected .img-resize-handle {
+  display: block;
+}
+
+.img-toolbar {
+  display: none;
+  position: absolute;
+  top: -32px;
+  right: 0;
+  z-index: 20;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: var(--sombra-sutil);
+  padding: 2px 4px;
+}
+
+.img-toolbar button {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  margin-left: 2px;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 2px 6px;
+  color: var(--color-primario);
+  transition: background var(--transicion);
+}
+
+.img-toolbar button:hover {
+  background: #e3eafc;
+}
+
+.img-resizable-wrapper.selected .img-toolbar {
+  display: inline-block;
+}
+
+/* =============================================================================
+   BOTONES Y CONTROLES
+   ============================================================================= */
+.btn {
+  background: var(--color-secundario);
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0 6px;
+  box-shadow: 0 2px 8px rgba(110, 123, 185, 0.13);
+  transition: background var(--transicion), box-shadow var(--transicion);
+}
+
+.btn:hover {
+  background: var(--color-exito);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(25, 135, 84, 0.13);
+}
+
+/* Botón discreto para limpiar evidencias */
+.btn-limpiar-discreto {
+  position: fixed !important;
+  top: 50% !important;
+  right: 20px !important;
+  transform: translateY(-50%) !important;
+  width: 36px;
+  height: 36px;
+  background: var(--color-error);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  transition: all var(--transicion);
+  z-index: 9999 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-limpiar-discreto:hover {
+  background: #b02a37;
+  transform: translateY(-50%) scale(1.1) !important;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5);
+}
+
+/* =============================================================================
+   MENSAJES Y ESTADOS
+   ============================================================================= */
+.char-count {
+  font-size: 0.85em;
+  color: var(--color-secundario);
+  text-align: right;
+  margin-bottom: 2px;
+  display: none;
+}
+
+.error {
+  color: var(--color-error);
+  font-size: 0.97em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.success {
+  color: var(--color-exito);
+  font-size: 1em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.info {
+  color: var(--color-info);
+  font-size: 1em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.warning {
+  color: var(--color-warning);
+  font-size: 1em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* =============================================================================
+   PAGINACIÓN
+   ============================================================================= */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 0 0;
+}
+
+.pagination button {
+  background: #e3eafc;
+  color: var(--color-primario);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transicion), color var(--transicion);
+}
+
+.pagination button.active,
+.pagination button:focus {
+  background: var(--color-secundario);
+  color: #fff;
+  font-weight: bold;
+  outline: none;
+}
+
+.pagination button:disabled {
+  background: #f1f1f1;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+@media (max-width: 900px) {
+  .container {
+    max-width: 99vw;
+    padding: 12px 4vw 80px 4vw;
+  }
+
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    min-width: 0;
+    max-width: 100vw;
+    border-radius: 0 0 18px 18px;
+    padding: 12px 4vw;
+    overflow-x: auto;
+    gap: 0;
+  }
+
+  .sidebar h3 {
+    display: none;
+  }
+
+  .sidebar-menu {
+    flex-direction: row;
+    width: 100%;
+    gap: 0;
+  }
+
+  .sidebar .nav-punto {
+    min-width: 120px;
+    justify-content: flex-start;
+    padding: 10px 8px;
+    font-size: 0.97em;
+    border-left: none;
+    border-bottom: 4px solid transparent;
+    border-radius: 0;
+    white-space: normal;
+    align-items: flex-start;
+  }
+
+  .sidebar .nav-punto.active,
+  .sidebar .nav-punto:focus {
+    border-left: none;
+    border-bottom: 4px solid var(--color-secundario);
+  }
+
+  .sidebar-muesca,
+  .sidebar-muesca-flotante {
+    top: 10px;
+    right: -14px;
+  }
+
+  .btn-limpiar-discreto {
+    right: 10px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 8px 2vw 80px 2vw;
+  }
+
+  .checklist-item {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .checklist-item select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sidebar .nav-punto {
+    font-size: 0.93em;
+    min-width: 180px;
+  }
+
+  .btn-limpiar-discreto {
+    right: 5px !important;
+  }
+}
+
+/* =============================================================================
+   UTILIDADES
+   ============================================================================= */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

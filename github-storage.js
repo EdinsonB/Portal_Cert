@@ -1,0 +1,209 @@
+/**
+ * =============================================================================
+ * GITHUB API - GESTIÓN DE AVANCES EN LA NUBE
+ * Sistema de guardado/carga usando GitHub como base de datos
+ * =============================================================================
+ */
+
+class GitHubStorage {
+  constructor() {
+    this.token = localStorage.getItem('github_token');
+    this.owner = localStorage.getItem('github_owner') || '';
+    this.repo = localStorage.getItem('github_repo') || 'Portal_Cert';
+    this.apiBase = 'https://api.github.com';
+  }
+
+  // Configurar credenciales de GitHub
+  async configurar() {
+    if (!this.token || !this.owner) {
+      const modal = this.crearModalConfiguracion();
+      return new Promise((resolve) => {
+        modal.onclose = () => resolve(this.token && this.owner);
+      });
+    }
+    return true;
+  }
+
+  crearModalConfiguracion() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 10000; display: flex;
+      align-items: center; justify-content: center;
+    `;
+    
+    modal.innerHTML = `
+      <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%;">
+        <h3>🔧 Configuración GitHub</h3>
+        <p>Para guardar avances en la nube, configure su GitHub:</p>
+        
+        <label><strong>Usuario GitHub:</strong></label>
+        <input type="text" id="github-owner" placeholder="tu-usuario" style="width: 100%; margin: 5px 0 15px; padding: 8px;">
+        
+        <label><strong>Token Personal:</strong></label>
+        <input type="password" id="github-token" placeholder="ghp_..." style="width: 100%; margin: 5px 0 15px; padding: 8px;">
+        
+        <details style="margin: 15px 0;">
+          <summary>¿Cómo obtener el token? 👆 Click aquí</summary>
+          <ol style="margin: 10px 0; padding-left: 20px; font-size: 0.9em;">
+            <li>Ir a GitHub → Settings → Developer settings</li>
+            <li>Personal access tokens → Generate new token</li>
+            <li>Seleccionar scope: <code>repo</code></li>
+            <li>Copiar el token generado</li>
+          </ol>
+        </details>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <button onclick="this.closest('div').parentElement.guardarConfig()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-right: 10px;">Guardar</button>
+          <button onclick="this.closest('div').parentElement.cancelarConfig()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Cancelar</button>
+        </div>
+      </div>
+    `;
+
+    modal.guardarConfig = () => {
+      const owner = document.getElementById('github-owner').value.trim();
+      const token = document.getElementById('github-token').value.trim();
+      
+      if (!owner || !token) {
+        alert('Debe completar ambos campos');
+        return;
+      }
+      
+      this.owner = owner;
+      this.token = token;
+      localStorage.setItem('github_owner', owner);
+      localStorage.setItem('github_token', token);
+      localStorage.setItem('github_repo', this.repo);
+      
+      document.body.removeChild(modal);
+      modal.onclose && modal.onclose();
+    };
+
+    modal.cancelarConfig = () => {
+      document.body.removeChild(modal);
+      modal.onclose && modal.onclose();
+    };
+
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  // Verificar si existe archivo de avances para un cliente
+  async verificarCliente(numeroCliente) {
+    if (!await this.configurar()) return false;
+
+    try {
+      const response = await fetch(
+        `${this.apiBase}/repos/${this.owner}/${this.repo}/contents/avances/${numeroCliente}.json`,
+        {
+          headers: {
+            'Authorization': `token ${this.token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      );
+      return response.ok;
+    } catch (error) {
+      console.log('Cliente nuevo o error de conexión:', error);
+      return false;
+    }
+  }
+
+  // Cargar avances de un cliente
+  async cargarAvances(numeroCliente) {
+    if (!await this.configurar()) throw new Error('Configuración cancelada');
+
+    try {
+      const response = await fetch(
+        `${this.apiBase}/repos/${this.owner}/${this.repo}/contents/avances/${numeroCliente}.json`,
+        {
+          headers: {
+            'Authorization': `token ${this.token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('No existen avances para este cliente');
+        }
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const content = JSON.parse(atob(data.content));
+      return { content, sha: data.sha };
+    } catch (error) {
+      throw new Error(`Error al cargar avances: ${error.message}`);
+    }
+  }
+
+  // Guardar avances de un cliente
+  async guardarAvances(numeroCliente, avances, sha = null) {
+    if (!await this.configurar()) throw new Error('Configuración cancelada');
+
+    const data = {
+      numeroCliente,
+      avances,
+      fechaActualizacion: new Date().toISOString()
+    };
+
+    const body = {
+      message: `Actualizar avances cliente ${numeroCliente}`,
+      content: btoa(JSON.stringify(data, null, 2))
+    };
+
+    if (sha) {
+      body.sha = sha;
+    }
+
+    try {
+      const response = await fetch(
+        `${this.apiBase}/repos/${this.owner}/${this.repo}/contents/avances/${numeroCliente}.json`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${this.token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const result = await response.json();
+      return result.content.sha;
+    } catch (error) {
+      throw new Error(`Error al guardar avances: ${error.message}`);
+    }
+  }
+
+  // Verificar conexión y permisos
+  async verificarConexion() {
+    if (!this.token || !this.owner) return false;
+
+    try {
+      const response = await fetch(
+        `${this.apiBase}/repos/${this.owner}/${this.repo}`,
+        {
+          headers: {
+            'Authorization': `token ${this.token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      );
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+// Instancia global
+window.githubStorage = new GitHubStorage();
